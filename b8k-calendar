@@ -7,7 +7,9 @@ public holidays of Russia in red, today in a blue circle, the days of the
 next and the previous month in grey. ‹ and › (or a swipe) turn the month,
 «Сегодня» comes back to it, a tap on the month's name shows the year. A
 tap on a day tells what day it is (the weekday, the week of the year, the
-holiday). Nothing to plan and nothing stored: it only shows dates.
+holiday); with no day picked the line under the grid sums up the month
+(its days, working days and holidays). Nothing to plan and nothing stored:
+it only shows dates.
 """
 import calendar
 import datetime
@@ -68,7 +70,9 @@ button.day {
   border-radius: 14px;
   font-size: 32px;
   color: #2e3436;
-  min-height: 72px;
+  /* Six weeks of 60 px still leave room for the line under the grid. */
+  min-height: 60px;
+  padding: 0;
 }
 button.day.red { color: #c01c28; }
 button.day.other { background-color: transparent; color: #9a9996; }
@@ -239,6 +243,8 @@ class Calendar(Gtk.Application):
         self.page.pack_start(self.info, False, False, 4)
         self.describe(self.picked or (today if (today.year, today.month) ==
                                       (self.year, self.month) else None))
+        if not self.info.get_text():
+            self.sum_up()
         self.page.show_all()
 
     def pick(self, day):
@@ -271,6 +277,18 @@ class Calendar(Gtk.Application):
         self.info.set_text(" · ".join(bits))
         ctx = self.info.get_style_context()
         (ctx.add_class if name else ctx.remove_class)("red")
+
+    def sum_up(self):
+        """The month in one line: days, working days, days off, holidays."""
+        days = [datetime.date(self.year, self.month, d)
+                for d in range(1, calendar.monthrange(self.year, self.month)[1] + 1)]
+        off = sum(1 for d in days if red(d))
+        names = sorted({holiday(d) for d in days if holiday(d)})
+        bits = ["%s %d" % (MONTHS[self.month - 1], self.year),
+                "%d дн." % len(days), "рабочих %d" % (len(days) - off), "выходных %d" % off]
+        bits.extend(names)
+        self.info.set_text(" · ".join(bits))
+        self.info.get_style_context().remove_class("red")
 
     # --- the year -------------------------------------------------------------
     def show_year(self):
