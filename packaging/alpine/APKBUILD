@@ -1,6 +1,6 @@
 # Maintainer: Mikhail Nevskiy <rensomail@gmail.com>
 pkgname=haltia-calendar
-pkgver=2.0.1
+pkgver=2.0.2
 pkgrel=0
 pkgdesc="Календарь: A classic month calendar with Russian holidays (GTK 3)"
 url="https://github.com/haltia-de/calendar"
