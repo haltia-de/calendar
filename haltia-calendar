@@ -13,6 +13,7 @@ it only shows dates.
 """
 import calendar
 import datetime
+import os
 import sys
 
 import gi
@@ -90,6 +91,9 @@ label.info.red { color: #c01c28; }
 """
 
 
+# Inside the Haltia shell (its session sets XDG_CURRENT_DESKTOP=Haltia:GNOME).
+ON_HALTIA = "Haltia" in os.environ.get("XDG_CURRENT_DESKTOP", "").split(":")
+
 def holiday(day):
     return HOLIDAYS.get((day.month, day.day))
 
@@ -118,6 +122,9 @@ class Calendar(Gtk.Application):
         self.win = Gtk.ApplicationWindow(application=self, title="Календарь")
         self.win.set_default_size(1160, 800)
         header = Gtk.HeaderBar(title="Календарь")
+        # The Haltia shell closes windows with its own button; any other desktop
+        # gets the usual window buttons in the header.
+        header.set_show_close_button(not ON_HALTIA)
         self.back_btn = Gtk.Button(label="←")
         self.back_btn.get_style_context().add_class("back")
         self.back_btn.connect("clicked", lambda *_a: self.show_month())
