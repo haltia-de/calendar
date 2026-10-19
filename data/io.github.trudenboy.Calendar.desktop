@@ -1,14 +1,10 @@
 [Desktop Entry]
+NoDisplay=true
 Type=Application
 Name=Calendar
 Name[ru]=Календарь
-Comment=A classic month calendar with Russian holidays
-Comment[ru]=Классический календарь на месяц с праздниками
-Exec=b8k-calendar
-Icon=io.github.trudenboy.Calendar
+Exec=haltia-calendar
+Icon=io.github.haltia_de.Calendar
 Terminal=false
 Categories=GTK;Office;Calendar;Utility;
-Keywords=calendar;date;month;календарь;дата;месяц;
 StartupNotify=true
-X-B8K-Home=true
-X-B8K-Replaces=calendar

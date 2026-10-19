@@ -1,20 +1,25 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
-# Install b8k-calendar (Календарь): sh install.sh [ROOT] [PREFIX]
+# Install haltia-calendar (Календарь): sh install.sh [ROOT] [PREFIX]
 # ROOT empty or / for this system; PREFIX /usr/local unless given (a
 # package passes /usr). It needs Python 3 with PyGObject (GTK 3) only. The
-# .desktop file
-# shows it in any desktop's launcher; the b8k tablet shell puts it on its
-# home screen (X-B8K-Home).
+# .desktop file shows it in any desktop's launcher; the Haltia shell puts
+# it on its home screen (X-Haltia-Home). The names before ADR 0004
+# (b8k-calendar, the id io.github.trudenboy.Calendar, hidden) stay until 3.0.
 set -eu
 root=${1:-}
 root=${root%/}
 prefix=${2:-/usr/local}
 here=$(cd "$(dirname "$0")" && pwd)
 share=$root$prefix/share
-install -D -m 755 "$here/b8k-calendar" "$root$prefix/bin/b8k-calendar"
-install -D -m 644 "$here/data/io.github.trudenboy.Calendar.desktop" "$share/applications/io.github.trudenboy.Calendar.desktop"
-install -D -m 644 "$here/data/io.github.trudenboy.Calendar.svg" "$share/icons/hicolor/scalable/apps/io.github.trudenboy.Calendar.svg"
-install -D -m 644 "$here/data/io.github.trudenboy.Calendar.metainfo.xml" "$share/metainfo/io.github.trudenboy.Calendar.metainfo.xml"
-# The shell's old entry for this program, from before the .desktop file.
+id=io.github.haltia_de.Calendar
+old=io.github.trudenboy.Calendar
+install -D -m 755 "$here/haltia-calendar" "$root$prefix/bin/haltia-calendar"
+ln -sfn haltia-calendar "$root$prefix/bin/b8k-calendar"
+install -D -m 644 "$here/data/$id.desktop" "$share/applications/$id.desktop"
+install -D -m 644 "$here/data/$old.desktop" "$share/applications/$old.desktop"
+install -D -m 644 "$here/data/$id.svg" "$share/icons/hicolor/scalable/apps/$id.svg"
+install -D -m 644 "$here/data/$id.metainfo.xml" "$share/metainfo/$id.metainfo.xml"
+# Files of the old names a manual install left behind.
+rm -f "$share/icons/hicolor/scalable/apps/$old.svg" "$share/metainfo/$old.metainfo.xml"
 rm -f "$root/usr/local/share/b8k/apps.d/calendar.conf" "$root/usr/local/share/b8k/calendar.svg"

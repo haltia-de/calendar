@@ -1,13 +1,17 @@
 # Maintainer: Mikhail Nevskiy <rensomail@gmail.com>
-pkgname=b8k-calendar
-pkgver=1.2.1
+pkgname=haltia-calendar
+pkgver=2.0.0
 pkgrel=0
 pkgdesc="Календарь: A classic month calendar with Russian holidays (GTK 3)"
-url="https://github.com/trudenboy/b8k-calendar"
+url="https://github.com/haltia-de/calendar"
 arch="noarch"
+# The name before ADR 0004: apk upgrade carries b8k-calendar over to this.
+provides="b8k-calendar=$pkgver-r$pkgrel"
+replaces="b8k-calendar"
 license="GPL-2.0-only"
 depends="python3 py3-gobject3 gtk+3.0"
-source="$pkgname-$pkgver.tar.gz::https://github.com/trudenboy/b8k-calendar/archive/v$pkgver.tar.gz"
+source="$pkgname-$pkgver.tar.gz::https://github.com/haltia-de/calendar/archive/v$pkgver.tar.gz"
+builddir="$srcdir/calendar-$pkgver"
 
 options="!check"
 

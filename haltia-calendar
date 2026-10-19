@@ -18,9 +18,9 @@ import sys
 import gi
 from gi.repository import GLib
 
-APP_ID = "io.github.trudenboy.Calendar"
+APP_ID = "io.github.haltia_de.Calendar"
 # Under Wayland GTK 3 names the window by the program name: the program's
-# id, as its .desktop file is named, so a desktop or the b8k shell finds it.
+# id, as its .desktop file is named, so a desktop or the Haltia shell finds it.
 GLib.set_prgname(APP_ID)
 
 gi.require_version("Gdk", "3.0")
