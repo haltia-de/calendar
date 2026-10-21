@@ -171,7 +171,12 @@ class Calendar(Gtk.Application):
 
     def tick(self):
         today = datetime.date.today()
-        if getattr(self, "shown_today", today) != today:
+        shown_today = getattr(self, "shown_today", today)
+        if shown_today != today:
+            if (self.year, self.month) == (shown_today.year, shown_today.month):
+                self.year, self.month = today.year, today.month
+                if (today.year, today.month) != (shown_today.year, shown_today.month):
+                    self.picked = None
             self.redraw()
         return True
 
