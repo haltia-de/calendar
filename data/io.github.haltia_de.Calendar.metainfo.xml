@@ -18,6 +18,12 @@
   <content_rating type="oars-1.1"/>
   <requires><control>touch</control></requires>
   <releases>
+    <release version="2.0.4" date="2026-10-21">
+      <description>
+        <p>In the year view, a swipe now turns the year instead of opening the month under your finger.</p>
+        <p xml:lang="ru">В годовом виде свайп теперь перелистывает год вместо открытия месяца под пальцем.</p>
+      </description>
+    </release>
     <release version="2.0.3" date="2026-10-19">
       <description>
         <p>Outside the Haltia shell the window has the desktop's usual buttons, close among them.</p>
