@@ -69,6 +69,64 @@ class BackActionTests(unittest.TestCase):
             show_month.assert_called_once_with()
 
 
+class MidnightTests(unittest.TestCase):
+    def check_tick(self, before, after, mode, displayed, picked, expected, expected_pick):
+        app = Calendar()
+        app.back_btn = Mock()
+        app.shown_today = before
+        app.year, app.month = displayed
+        app.mode, app.picked = mode, picked
+        # Keep the real redraw and back-state logic without needing a display.
+        with patch.object(calendar["datetime"], "date") as clock, \
+                patch.object(app, "show_month", side_effect=app.update_back) as month, \
+                patch.object(app, "show_year", side_effect=app.update_back) as year:
+            clock.today.return_value = after
+            self.assertTrue(app.tick())
+        self.assertEqual((app.year, app.month), expected)
+        self.assertEqual(app.picked, expected_pick)
+        self.assertEqual(app.mode, mode)
+        (month if mode == "month" else year).assert_called_once_with()
+        (year if mode == "month" else month).assert_not_called()
+        enabled = mode == "year" or expected_pick is not None
+        self.assertEqual(app.back_action.get_enabled(), enabled)
+        app.back_btn.set_visible.assert_called_once_with(enabled)
+
+    def test_month_and_year_rollover(self):
+        for before, after in (
+            (datetime.date(2026, 10, 31), datetime.date(2026, 11, 1)),
+            (datetime.date(2026, 12, 31), datetime.date(2027, 1, 1)),
+        ):
+            for mode in ("month", "year"):
+                for picked in (None, before):
+                    with self.subTest(before=before, mode=mode, picked=picked):
+                        self.check_tick(before, after, mode,
+                                        (before.year, before.month), picked,
+                                        (after.year, after.month), None)
+
+    def test_browsed_month_is_preserved(self):
+        for before, after in (
+            (datetime.date(2026, 10, 31), datetime.date(2026, 11, 1)),
+            (datetime.date(2026, 12, 31), datetime.date(2027, 1, 1)),
+        ):
+            for mode in ("month", "year"):
+                for picked in (None, datetime.date(2025, 3, 15)):
+                    with self.subTest(before=before, mode=mode, picked=picked):
+                        self.check_tick(before, after, mode, (2025, 3), picked,
+                                        (2025, 3), picked)
+
+    def test_same_month_preserves_selected_day(self):
+        before = datetime.date(2026, 10, 21)
+        self.check_tick(before, datetime.date(2026, 10, 22), "month",
+                        (2026, 10), before, (2026, 10), before)
+
+    def test_same_day_does_not_redraw(self):
+        app = Calendar()
+        app.shown_today = datetime.date.today()
+        with patch.object(app, "redraw") as redraw:
+            self.assertTrue(app.tick())
+        redraw.assert_not_called()
+
+
 @unittest.skipUnless(Gtk.init_check()[0], "GTK display required")
 class BackWidgetTests(unittest.TestCase):
     @classmethod
