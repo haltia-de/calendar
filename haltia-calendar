@@ -26,7 +26,7 @@ GLib.set_prgname(APP_ID)
 
 gi.require_version("Gdk", "3.0")
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gdk, GLib, Gtk  # noqa: E402,F811
+from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402,F811
 
 MONTHS = ("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август",
           "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
@@ -110,6 +110,20 @@ class Calendar(Gtk.Application):
         self.year, self.month = today.year, today.month
         self.picked = None
         self.mode = "month"
+        self.back_action = Gio.SimpleAction.new("back", None)
+        self.back_action.set_enabled(False)
+        self.back_action.connect("activate", self.on_back)
+        self.add_action(self.back_action)
+
+    def on_back(self, _action, _parameter):
+        if self.mode == "month":
+            self.picked = None
+        self.show_month()
+
+    def update_back(self):
+        enabled = self.mode == "year" or self.picked is not None
+        self.back_action.set_enabled(enabled)
+        self.back_btn.set_visible(enabled)
 
     def do_activate(self):
         if self.win:
@@ -125,11 +139,15 @@ class Calendar(Gtk.Application):
         # The Haltia shell closes windows with its own button; any other desktop
         # gets the usual window buttons in the header.
         header.set_show_close_button(not ON_HALTIA)
+        header.set_decoration_layout(":close")
+        back_slot = Gtk.Box()
+        back_slot.set_size_request(110, -1)
         self.back_btn = Gtk.Button(label="←")
         self.back_btn.get_style_context().add_class("back")
-        self.back_btn.connect("clicked", lambda *_a: self.show_month())
+        self.back_btn.set_action_name("app.back")
         self.back_btn.set_no_show_all(True)
-        header.pack_start(self.back_btn)
+        back_slot.pack_start(self.back_btn, False, False, 0)
+        header.pack_start(back_slot)
         self.win.set_titlebar(header)
 
         self.page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -208,7 +226,7 @@ class Calendar(Gtk.Application):
     # --- the month ------------------------------------------------------------
     def show_month(self):
         self.mode = "month"
-        self.back_btn.hide()
+        self.update_back()
         self.clear()
         today = datetime.date.today()
         self.shown_today = today
@@ -296,7 +314,7 @@ class Calendar(Gtk.Application):
     # --- the year -------------------------------------------------------------
     def show_year(self):
         self.mode = "year"
-        self.back_btn.show()
+        self.update_back()
         self.clear()
         today = datetime.date.today()
         self.shown_today = today
