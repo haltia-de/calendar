@@ -52,6 +52,14 @@ class BackActionTests(unittest.TestCase):
             self.assertIsNone(self.app.picked)
             show_month.assert_called_once_with()
 
+    def test_action_returns_from_year_without_selected_day(self):
+        self.app.mode = "year"
+        self.app.update_back()
+        with patch.object(self.app, "show_month") as show_month:
+            self.action.activate(None)
+            self.assertIsNone(self.app.picked)
+            show_month.assert_called_once_with()
+
     def test_action_returns_from_year_preserving_selected_day(self):
         self.app.mode = "year"
         self.app.picked = datetime.date(2026, 10, 21)
