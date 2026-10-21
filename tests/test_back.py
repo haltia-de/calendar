@@ -6,6 +6,7 @@ from pathlib import Path
 import runpy
 import unittest
 from unittest.mock import Mock, patch
+import uuid
 
 calendar = runpy.run_path(
     str(Path(__file__).resolve().parents[1] / "haltia-calendar"),
@@ -65,6 +66,9 @@ class BackActionTests(unittest.TestCase):
 class BackWidgetTests(unittest.TestCase):
     def setUp(self):
         self.app = Calendar()
+        # NON_UNIQUE still exports actions on the shared session bus. Each
+        # instance needs its own object path, including across test methods.
+        self.app.set_application_id("io.github.haltia_de.Calendar.Test" + uuid.uuid4().hex)
         self.app.set_flags(calendar["Gio"].ApplicationFlags.NON_UNIQUE)
         self.assertTrue(self.app.register(None))
         with patch.object(calendar["GLib"], "timeout_add_seconds"):
