@@ -6,7 +6,6 @@ from pathlib import Path
 import runpy
 import unittest
 from unittest.mock import Mock, patch
-import uuid
 
 calendar = runpy.run_path(
     str(Path(__file__).resolve().parents[1] / "haltia-calendar"),
@@ -72,17 +71,29 @@ class BackActionTests(unittest.TestCase):
 
 @unittest.skipUnless(Gtk.init_check()[0], "GTK display required")
 class BackWidgetTests(unittest.TestCase):
-    def setUp(self):
-        self.app = Calendar()
-        # NON_UNIQUE still exports actions on the shared session bus. Each
-        # instance needs its own object path, including across test methods.
-        self.app.set_application_id("io.github.haltia_de.Calendar.Test" + uuid.uuid4().hex)
-        self.app.set_flags(calendar["Gio"].ApplicationFlags.NON_UNIQUE)
-        self.assertTrue(self.app.register(None))
+    @classmethod
+    def setUpClass(cls):
+        # GLib registers one GApplication per process, so all the checks share
+        # one Calendar. Without an application id it stays off the session
+        # bus and cannot meet a running Calendar.
+        cls.app = Calendar()
+        cls.app.set_application_id(None)
+        if not cls.app.register(None):
+            raise RuntimeError("the Calendar did not register")
         with patch.object(calendar["GLib"], "timeout_add_seconds"):
-            self.app.activate()
-        self.action = self.app.lookup_action("back")
-        self.addCleanup(self.app.win.destroy)
+            cls.app.activate()
+        cls.action = cls.app.lookup_action("back")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.app.win.destroy()
+
+    def setUp(self):
+        # Every check starts on the root screen: this month, no day picked.
+        today = datetime.date.today()
+        self.app.year, self.app.month = today.year, today.month
+        self.app.picked = None
+        self.app.show_month()
 
     def assert_back(self, enabled):
         self.assertEqual(self.action.get_enabled(), enabled)

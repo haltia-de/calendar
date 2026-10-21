@@ -10,6 +10,13 @@ tap on a day tells what day it is (the weekday, the week of the year, the
 holiday); with no day picked the line under the grid sums up the month
 (its days, working days and holidays). Nothing to plan and nothing stored:
 it only shows dates.
+
+The month with no day picked is the root screen. A picked day counts as a
+back step, so a tap on a day or on «Сегодня» enables the action app.back
+and shows «←» in the header's left corner; back clears the pick. From the
+year, back returns to the month (and keeps a picked day, so a second back
+clears it). The Haltia shell watches app.back and puts its «домой» button in
+that corner while the action is disabled.
 """
 import calendar
 import datetime
