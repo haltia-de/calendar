@@ -327,16 +327,34 @@ class Calendar(Gtk.Application):
             box.pack_start(days, True, True, 0)
             ev = Gtk.EventBox()
             ev.add(box)
-            ev.connect("button-release-event", lambda *_a, mm=m: self.open_month(mm))
+            # A tap opens the month. Returning True from the release would
+            # hide it from the page's GestureSwipe, so a drag of more than
+            # 30 px is left unhandled and turns the year.
+            ev.connect("button-press-event", self.on_mini_press)
+            ev.connect("button-release-event",
+                       lambda _w, e, mm=m: self.on_mini_release(e, mm))
             months.attach(ev, (m - 1) % 4, (m - 1) // 4, 1, 1)
         self.page.pack_start(months, True, True, 0)
         self.page.show_all()
+
+    def on_mini_press(self, _w, event):
+        self._mini_xy = (event.x_root, event.y_root)
+        return False
+
+    def on_mini_release(self, event, m):
+        at = getattr(self, "_mini_xy", None)
+        self._mini_xy = None
+        if at is not None:
+            dx, dy = event.x_root - at[0], event.y_root - at[1]
+            if dx * dx + dy * dy > 30 * 30:
+                return False
+        self.open_month(m)
+        return True
 
     def open_month(self, m):
         self.month = m
         self.picked = None
         self.show_month()
-        return True
 
 
 if __name__ == "__main__":
