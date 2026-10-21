@@ -1,5 +1,15 @@
 # Что нового · What's new
 
+## 2.0.4 (2026-10-21)
+
+### Русский
+
+В годовом виде свайп теперь перелистывает год вместо открытия месяца под пальцем.
+
+### English
+
+In the year view, a swipe now turns the year instead of opening the month under your finger.
+
 ## 2.0.3 (2026-10-19)
 
 ### Русский
