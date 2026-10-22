@@ -1,5 +1,15 @@
 # Что нового · What's new
 
+## 2.0.5 (2026-10-22)
+
+### Русский
+
+На экране месяца слева вверху появилась кнопка «домой», а в годовом виде и после выбора дня — «←» (#8). В полночь календарь сам переходит к новому месяцу и году (#10).
+
+### English
+
+The month screen now has a home button at the top left; the year view and the view after picking a day show «←» (#8). At midnight, the calendar switches to the new month and year automatically (#10).
+
 ## 2.0.4 (2026-10-21)
 
 ### Русский

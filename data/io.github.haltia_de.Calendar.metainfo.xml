@@ -18,6 +18,12 @@
   <content_rating type="oars-1.1"/>
   <requires><control>touch</control></requires>
   <releases>
+    <release version="2.0.5" date="2026-10-22">
+      <description>
+        <p>The month screen now has a home button at the top left; the year view and the view after picking a day show «←» (#8). At midnight, the calendar switches to the new month and year automatically (#10).</p>
+        <p xml:lang="ru">На экране месяца слева вверху появилась кнопка «домой», а в годовом виде и после выбора дня — «←» (#8). В полночь календарь сам переходит к новому месяцу и году (#10).</p>
+      </description>
+    </release>
     <release version="2.0.4" date="2026-10-21">
       <description>
         <p>In the year view, a swipe now turns the year instead of opening the month under your finger.</p>
