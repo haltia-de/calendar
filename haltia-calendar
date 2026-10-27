@@ -117,6 +117,9 @@ class Calendar(Gtk.Application):
         self.year, self.month = today.year, today.month
         self.picked = None
         self.mode = "month"
+        # The year's 12 months and their 504 day labels are built once and
+        # then refilled: building them took the year view most of its time.
+        self.year_view = None
         self.back_action = Gio.SimpleAction.new("back", None)
         self.back_action.set_enabled(False)
         self.back_action.connect("activate", self.on_back)
@@ -183,7 +186,8 @@ class Calendar(Gtk.Application):
     def clear(self):
         for child in self.page.get_children():
             self.page.remove(child)
-            child.destroy()
+            if child is not self.year_view:
+                child.destroy()
 
     def redraw(self):
         if self.mode == "month":
@@ -330,30 +334,39 @@ class Calendar(Gtk.Application):
         self.clear()
         today = datetime.date.today()
         self.shown_today = today
-        self.page.pack_start(self.top_row(str(self.year), lambda: None), False, False, 0)
+        if self.year_view is None:
+            self.build_year()
+        self.fill_year(today)
+        self.page.pack_start(self.year_view, True, True, 0)
+
+    def build_year(self):
+        """The year's widgets, empty: fill_year() puts a year into them."""
+        self.year_view = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        top = self.top_row("", lambda: None)
+        self.year_title = top.get_children()[1]
+        self.year_view.pack_start(top, False, False, 0)
         months = Gtk.Grid(row_spacing=12, column_spacing=12, column_homogeneous=True,
                           row_homogeneous=True)
-        cal = calendar.Calendar(firstweekday=0)
+        self.year_names, self.year_days = [], []
         for m in range(1, 13):
             box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
             box.get_style_context().add_class("mini")
             name = Gtk.Label(label=MONTHS[m - 1])
-            ctx = name.get_style_context()
-            ctx.add_class("mname")
-            if (self.year, m) == (today.year, today.month):
-                ctx.add_class("now")
+            name.get_style_context().add_class("mname")
+            self.year_names.append(name)
             box.pack_start(name, False, False, 0)
             days = Gtk.Grid(column_homogeneous=True, row_spacing=1)
-            for r, week in enumerate(cal.monthdatescalendar(self.year, m)):
-                for c, day in enumerate(week):
-                    label = Gtk.Label(label=str(day.day) if day.month == m else "")
-                    lctx = label.get_style_context()
-                    lctx.add_class("d")
-                    if day.month == m and red(day):
-                        lctx.add_class("red")
-                    if day == today:
-                        lctx.add_class("today")
+            # Six weeks at most; fill_year() hides the weeks a month lacks,
+            # and show_all() leaves the labels to it.
+            labels = []
+            for r in range(6):
+                for c in range(7):
+                    label = Gtk.Label()
+                    label.get_style_context().add_class("d")
+                    label.set_no_show_all(True)
                     days.attach(label, c, r, 1, 1)
+                    labels.append(label)
+            self.year_days.append(labels)
             box.pack_start(days, True, True, 0)
             ev = Gtk.EventBox()
             ev.add(box)
@@ -364,8 +377,28 @@ class Calendar(Gtk.Application):
             ev.connect("button-release-event",
                        lambda _w, e, mm=m: self.on_mini_release(e, mm))
             months.attach(ev, (m - 1) % 4, (m - 1) // 4, 1, 1)
-        self.page.pack_start(months, True, True, 0)
-        self.page.show_all()
+        self.year_view.pack_start(months, True, True, 0)
+        self.year_view.show_all()
+
+    def fill_year(self, today):
+        self.year_title.set_label(str(self.year))
+        cal = calendar.Calendar(firstweekday=0)
+        for m in range(1, 13):
+            ctx = self.year_names[m - 1].get_style_context()
+            (ctx.add_class if (self.year, m) == (today.year, today.month)
+             else ctx.remove_class)("now")
+            weeks = cal.monthdatescalendar(self.year, m)
+            for i, label in enumerate(self.year_days[m - 1]):
+                if i >= 7 * len(weeks):
+                    label.hide()
+                    continue
+                day = weeks[i // 7][i % 7]
+                label.set_text(str(day.day) if day.month == m else "")
+                lctx = label.get_style_context()
+                (lctx.add_class if day.month == m and red(day)
+                 else lctx.remove_class)("red")
+                (lctx.add_class if day == today else lctx.remove_class)("today")
+                label.show()
 
     def on_mini_press(self, _w, event):
         self._mini_xy = (event.x_root, event.y_root)
