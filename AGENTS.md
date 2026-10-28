@@ -11,7 +11,7 @@ The application id is `io.github.haltia_de.Calendar`. The command and the Alpine
 - `data/io.github.haltia_de.Calendar.svg` is the icon.
 - `data/io.github.haltia_de.Calendar.metainfo.xml` is the AppStream record. Each version is a `<release>`.
 - `data/io.github.trudenboy.Calendar.desktop` is the hidden launcher of the old id (`NoDisplay=true`).
-- `install.sh` installs the program, both desktop files, the icon and the metainfo, and links `b8k-calendar` to `haltia-calendar`.
+- `install.sh` installs the program (as a module in `PREFIX/lib/haltia-calendar`, run by a stub in `PREFIX/bin`), both desktop files, the icon and the metainfo, and links `b8k-calendar` to `haltia-calendar`.
 - `packaging/alpine/APKBUILD` is the noarch Alpine package.
 - `NEWS.md` is the release notes, in Russian and in English.
 - `.github/workflows/release.yml` runs on a `vX.Y.Z` tag and calls `haltia-de/ci`.
@@ -34,6 +34,8 @@ sh install.sh [ROOT] [PREFIX]
 ```
 
 `ROOT` empty, or `/`, means this system. `PREFIX` defaults to `/usr/local`. `packaging/alpine/APKBUILD` calls `sh ./install.sh "$pkgdir" /usr`.
+
+`install.sh` installs the script as the module `PREFIX/lib/haltia-calendar/haltia_calendar_main.py` and writes `PREFIX/bin/haltia-calendar` as a stub that runs it with `runpy.run_module(..., alter_sys=False)`: Python never caches the script it is started by, so the program's code loads from the `__pycache__` the package build writes (haltia-de/ci compiles every module). `sys.argv` and the command line `python3 PREFIX/bin/haltia-calendar` stay as they were (the Haltia shell finds programs by it); `__file__` is the module in `PREFIX/lib/haltia-calendar`.
 
 ## Release
 

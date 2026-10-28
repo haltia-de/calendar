@@ -14,7 +14,23 @@ here=$(cd "$(dirname "$0")" && pwd)
 share=$root$prefix/share
 id=io.github.haltia_de.Calendar
 old=io.github.trudenboy.Calendar
-install -D -m 755 "$here/haltia-calendar" "$root$prefix/bin/haltia-calendar"
+# The program runs from PREFIX/lib/haltia-calendar/haltia_calendar_main.py as a module, so
+# Python loads it compiled (the package build writes its __pycache__);
+# Python never caches the script it is started by. PREFIX/bin/haltia-calendar
+# is a stub that runs the module, so the command line stays
+# "python3 PREFIX/bin/haltia-calendar" (the Haltia shell finds programs by it).
+lib=$prefix/lib/haltia-calendar
+install -D -m 644 "$here/haltia-calendar" "$root$lib/haltia_calendar_main.py"
+install -d -m 755 "$root$prefix/bin"
+cat > "$root$prefix/bin/haltia-calendar" <<EOF
+#!/usr/bin/python3
+# Runs $lib/haltia_calendar_main.py as a module, so Python loads it compiled.
+import runpy
+import sys
+sys.path.insert(0, "$lib")
+runpy.run_module("haltia_calendar_main", run_name="__main__", alter_sys=False)
+EOF
+chmod 755 "$root$prefix/bin/haltia-calendar"
 ln -sfn haltia-calendar "$root$prefix/bin/b8k-calendar"
 install -D -m 644 "$here/data/$id.desktop" "$share/applications/$id.desktop"
 install -D -m 644 "$here/data/$old.desktop" "$share/applications/$old.desktop"
