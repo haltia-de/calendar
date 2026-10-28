@@ -18,6 +18,12 @@
   <content_rating type="oars-1.1"/>
   <requires><control>touch</control></requires>
   <releases>
+    <release version="2.0.6" date="2026-10-28">
+      <description>
+        <p>The year view opens and turns from year to year faster.</p>
+        <p xml:lang="ru">Годовой вид открывается и перелистывается быстрее.</p>
+      </description>
+    </release>
     <release version="2.0.5" date="2026-10-22">
       <description>
         <p>The month screen now has a home button at the top left; the year view and the view after picking a day show «←» (#8). At midnight, the calendar switches to the new month and year automatically (#10).</p>
