@@ -23,7 +23,7 @@ lib=$prefix/lib/haltia-calendar
 install -D -m 644 "$here/haltia-calendar" "$root$lib/haltia_calendar_main.py"
 install -d -m 755 "$root$prefix/bin"
 cat > "$root$prefix/bin/haltia-calendar" <<EOF
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # Runs $lib/haltia_calendar_main.py as a module, so Python loads it compiled.
 import runpy
 import sys
